@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#141216">
+  <title>Hyakki Gorge</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #141216; }
+    body { position: fixed; inset: 0; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    #unity-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: #141216; touch-action: none; outline: none; }
+    #loader { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #efe9d9; font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-align: center; padding: 16px; }
+    #loader h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: 0.04em; }
+    #bar { width: min(320px, 70vw); height: 6px; border-radius: 3px; background: #3a3438; overflow: hidden; }
+    #fill { width: 0; height: 100%; background: #d98c40; transition: width 0.15s; }
+    #msg { opacity: 0.7; font-size: 13px; max-width: 28em; }
+    #err { color: #ff9a8a; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="loader">
+    <h1>Hyakki Gorge</h1>
+    <div id="bar"><div id="fill"></div></div>
+    <div id="msg">Loading the gorge&hellip;</div>
+  </div>
+  <script>
+    (function () {
+      var canvas = document.getElementById("unity-canvas");
+      var fill = document.getElementById("fill"), msg = document.getElementById("msg"), loader = document.getElementById("loader");
+      var mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+      // Relative URLs, so the build works from any sub-path (e.g. https://user.github.io/repo/).
+      var buildUrl = "Build";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data.unityweb",
+        frameworkUrl: buildUrl + "/WebGL.framework.js.unityweb",
+        codeUrl: buildUrl + "/WebGL.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Hyakki",
+        productName: "Hyakki Gorge",
+        productVersion: "0.1.0",
+        // phones report DPR 3; cap the backbuffer (Unity also applies the web tier's render scale)
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 2 : 1.5),
+        showBanner: function (text, type) {
+          if (type === "error") { msg.innerHTML = '<span id="err"></span>'; document.getElementById("err").textContent = text; loader.style.display = "flex"; }
+          console[type === "error" ? "error" : "warn"](text);
+        }
+      };
+      var script = document.createElement("script");
+      script.src = buildUrl + "/WebGL.loader.js";
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (p) {
+          fill.style.width = Math.round(p * 100) + "%";
+          if (p >= 0.9) msg.textContent = "Starting…";
+        }).then(function (instance) {
+          loader.style.display = "none";
+          window.unityInstance = instance;
+        }).catch(function (e) {
+          msg.innerHTML = '<span id="err"></span>';
+          document.getElementById("err").textContent = "Could not start: " + e;
+          console.error(e);
+        });
+      };
+      script.onerror = function () { msg.textContent = "Could not load the game files."; };
+      document.body.appendChild(script);
+      // stop iOS pinch / double-tap page zoom from fighting the in-game pinch
+      ["gesturestart", "gesturechange", "gestureend"].forEach(function (n) { document.addEventListener(n, function (e) { e.preventDefault(); }, { passive: false }); });
+      document.addEventListener("touchmove", function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    })();
+  </script>
+</body>
+</html>
