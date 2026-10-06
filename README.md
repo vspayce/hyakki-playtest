@@ -4,6 +4,10 @@ These are early playtest builds of **Hyakki: Night Parade**, a dark-fantasy acti
 
 This repo holds builds only. The source code is private.
 
+## Play in your browser
+
+[**Play now: vspayce.github.io/hyakki-playtest**](https://vspayce.github.io/hyakki-playtest/) works on desktop and phone, with touch controls. It's a lighter-quality version, so for the full look download a build below. Chrome or Edge work best on desktop, and Safari or Chrome on phones. The first load is about 67 MB.
+
 ## Download
 
 Get the latest build from [**Releases**](../../releases/latest).
